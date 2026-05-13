@@ -1,0 +1,14 @@
+# arxiv-digest scheduler — runs the pipeline on a regular cadence.
+#
+# This file is owned by root inside the scheduler container. crond reads
+# it from /var/spool/cron/crontabs/root.
+#
+# Times are interpreted in the container's TZ env var (default UTC).
+#
+# m h dom mon dow command
+# Weekly: Monday 07:00, the canonical run cadence
+0 7 * * 1 docker exec arxiv-digest-pipeline python -m src.pipeline weekly 2>&1
+# Monthly aggregation: first of month at 08:00 (after weekly has had time to finish)
+0 8 1 * * docker exec arxiv-digest-pipeline python -m src.pipeline monthly 2>&1
+# Yearly aggregation: Jan 1 at 09:00
+0 9 1 1 * docker exec arxiv-digest-pipeline python -m src.pipeline yearly 2>&1
