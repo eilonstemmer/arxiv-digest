@@ -1,0 +1,63 @@
+{% extends "_base.html.j2" %}
+
+{% block title %}arXiv Digest — {{ month }}{% endblock %}
+
+{% block body %}
+<header class="digest-header">
+  <h1>arXiv Digest &mdash; {{ month }}</h1>
+  <p class="meta">
+    {{ paper_count }} paper{% if paper_count != 1 %}s{% endif %}
+    across {{ weeks | length }} week{% if weeks | length != 1 %}s{% endif %}
+    &bull; {{ top_clusters | length }} top cluster{% if top_clusters | length != 1 %}s{% endif %}
+  </p>
+</header>
+
+{% if not top_clusters and not top_papers %}
+<div class="empty-state">No data found for this month.</div>
+{% else %}
+
+{% if top_clusters %}
+<section>
+  <h2>Top clusters this month</h2>
+  <div class="chart-wrapper">
+  {{ bar_chart_svg | safe }}
+  </div>
+
+  {% for c in top_clusters %}
+  <div style="margin-bottom:1.5rem; padding:1rem; background:#f9f9f7; border-radius:6px;">
+    <h3 style="margin-top:0;">{{ c.label }}</h3>
+    <p class="cluster-description">{{ c.description }}</p>
+    <p class="cluster-stats">{{ c.paper_count }} paper{% if c.paper_count != 1 %}s{% endif %}</p>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if top_papers %}
+<section class="top-papers">
+  <h2>Top papers this month</h2>
+  {% for p in top_papers %}
+  <div class="top-paper-row">
+    <div class="top-paper-rank">#{{ loop.index }}</div>
+    <div class="top-paper-body">
+      <div class="top-paper-title">
+        <a href="{{ p.url_abs }}" target="_blank" rel="noopener noreferrer">{{ p.title }}</a>
+      </div>
+      <div class="top-paper-authors">{{ p.authors_display }}</div>
+      <div class="paper-meta" style="margin-top:0.3rem;">
+        <span class="paper-score">score: {{ p.relevance_score | format_score }}</span>
+        {% if p.summary and p.summary.novelty_signal %}
+        <span class="badge badge-{{ p.summary.novelty_signal }}">{{ p.summary.novelty_signal | replace('_', ' ') }}</span>
+        {% endif %}
+      </div>
+      {% if p.summary and p.summary.why_it_matters %}
+      <p class="paper-why" style="margin-top:0.35rem;">{{ p.summary.why_it_matters }}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "_base.html.j2" %}
+
+{% block title %}arXiv Digest — {{ week }}{% endblock %}
+
+{% block body %}
+<header class="digest-header">
+  <h1>arXiv Digest &mdash; {{ week }}</h1>
+  <p class="meta">
+    {{ paper_count }} paper{% if paper_count != 1 %}s{% endif %}
+    &bull; {{ clusters | length }} cluster{% if clusters | length != 1 %}s{% endif %}
+  </p>
+</header>
+
+{% if headline %}
+<div class="headline" role="note">{{ headline }}</div>
+{% endif %}
+
+{% if not clusters %}
+<div class="empty-state">No papers clustered this week.</div>
+{% else %}
+
+{% if clusters %}
+<div class="chart-wrapper">
+{{ bar_chart_svg | safe }}
+</div>
+{% endif %}
+
+{% for c in clusters %}
+<section class="cluster-section" id="cluster-{{ c.cluster_id }}">
+  <div class="cluster-header">
+    <h2>{{ c.label }}</h2>
+    {% if c.trend and c.trend.velocity_class %}
+    <span class="badge badge-{{ c.trend.velocity_class }}">{{ c.trend.velocity_class }}</span>
+    {% endif %}
+    {% if c.trend and c.trend.is_new %}
+    <span class="badge badge-new">New</span>
+    {% endif %}
+  </div>
+
+  <p class="cluster-description">{{ c.description }}</p>
+
+  <p class="cluster-stats">
+    {{ c.paper_count }} paper{% if c.paper_count != 1 %}s{% endif %}
+    {% if c.trend and c.trend.delta_vs_w4 is not none %}
+    &bull; vs 4-week avg: <strong>{{ c.trend.delta_vs_w4 | pct_delta }}</strong>
+    {% endif %}
+  </p>
+
+  {% if c.papers %}
+  <ul class="paper-list">
+    {% for p in c.papers %}
+    <li class="paper-item">
+      <div class="paper-title">
+        <a href="{{ p.url_abs }}" target="_blank" rel="noopener noreferrer">{{ p.title }}</a>
+      </div>
+
+      <div class="paper-authors">{{ p.authors_display }}</div>
+
+      <div class="paper-meta">
+        <span class="paper-score">score: {{ p.relevance_score | format_score }}</span>
+        {% if p.summary %}
+        <span class="badge badge-{{ p.summary.novelty_signal }}">{{ p.summary.novelty_signal | replace('_', ' ') }}</span>
+        {% endif %}
+      </div>
+
+      {% if p.summary and p.summary.tags %}
+      <div class="paper-tags">
+        {% for tag in p.summary.tags %}
+        <span class="badge tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if p.summary and p.summary.why_it_matters %}
+      <p class="paper-why">{{ p.summary.why_it_matters }}</p>
+      {% endif %}
+
+      {% if p.summary and p.summary.cross_domain_hooks %}
+      <div class="paper-hooks">
+        <div class="paper-hooks-title">Cross-domain connections</div>
+        <ul>
+          {% for hook in p.summary.cross_domain_hooks %}
+          <li>
+            <span class="badge badge-{{ hook.strength | lower }}">{{ hook.strength }}</span>
+            {{ hook.connection }}
+            <small>({{ hook.arxiv_id }})</small>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p><em>No papers in this cluster.</em></p>
+  {% endif %}
+</section>
+{% endfor %}
+
+{% endif %}
+{% endblock %}

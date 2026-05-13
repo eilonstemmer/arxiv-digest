@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}arXiv Digest{% endblock %}</title>
+<style>
+/* ── Reset & base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  line-height: 1.65;
+  color: #1a1a1a;
+  background: #fafaf8;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Typography ─────────────────────────────────────────────────────── */
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #111;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #111;
+  margin-top: 2.5rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 1.4rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+p {
+  margin-bottom: 0.8rem;
+}
+
+a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: #1d4ed8;
+}
+
+small {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* ── Layout sections ────────────────────────────────────────────────── */
+.digest-header {
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.digest-header .meta {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+  font-family: ui-monospace, 'Courier New', monospace;
+}
+
+.headline {
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+  color: #444;
+}
+
+/* ── Cluster sections ───────────────────────────────────────────────── */
+.cluster-section {
+  margin-bottom: 3rem;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 1.5rem;
+}
+
+.cluster-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.cluster-description {
+  font-size: 0.92rem;
+  color: #555;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+}
+
+.cluster-stats {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1rem;
+  font-family: ui-monospace, 'Courier New', monospace;
+}
+
+/* ── SVG chart ──────────────────────────────────────────────────────── */
+.chart-wrapper {
+  margin: 1rem 0 1.5rem;
+  overflow-x: auto;
+}
+
+/* ── Paper cards ────────────────────────────────────────────────────── */
+.paper-list {
+  list-style: none;
+  margin-top: 0.5rem;
+}
+
+.paper-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.paper-item:last-child {
+  border-bottom: none;
+}
+
+.paper-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.paper-title a {
+  color: #111;
+  text-decoration: none;
+}
+
+.paper-title a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.paper-authors {
+  font-size: 0.83rem;
+  color: #666;
+  margin-bottom: 0.4rem;
+  font-family: ui-monospace, 'Courier New', monospace;
+}
+
+.paper-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.paper-score {
+  font-size: 0.78rem;
+  color: #777;
+  font-family: ui-monospace, 'Courier New', monospace;
+}
+
+.paper-why {
+  font-size: 0.92rem;
+  color: #333;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.paper-hooks {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.paper-hooks-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.paper-hooks ul {
+  list-style: none;
+  padding: 0;
+}
+
+.paper-hooks li {
+  padding: 0.15rem 0;
+  color: #444;
+}
+
+.paper-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+/* ── Badge styles ───────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  font-family: ui-monospace, 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+/* velocity badges */
+.badge-accelerating { background: #dcfce7; color: #15803d; }
+.badge-growing      { background: #dbeafe; color: #1d4ed8; }
+.badge-flat         { background: #f3f4f6; color: #6b7280; }
+.badge-shrinking    { background: #fee2e2; color: #b91c1c; }
+
+/* novelty badges */
+.badge-breakthrough_claim { background: #fef9c3; color: #a16207; }
+.badge-notable            { background: #ede9fe; color: #6d28d9; }
+.badge-incremental        { background: #f1f5f9; color: #475569; }
+
+/* is_new badge */
+.badge-new { background: #ecfdf5; color: #065f46; }
+
+/* cross-domain strength badges */
+.badge-strong   { background: #fde68a; color: #92400e; }
+.badge-moderate { background: #e0f2fe; color: #0369a1; }
+.badge-weak     { background: #f1f5f9; color: #64748b; }
+
+/* generic tag badge */
+.tag { background: #f1f5f9; color: #334155; }
+
+/* ── Empty state ────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #888;
+  font-style: italic;
+  border: 2px dashed #e5e5e5;
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+/* ── Top papers table (monthly/yearly) ──────────────────────────────── */
+.top-papers {
+  margin-top: 1.5rem;
+}
+
+.top-paper-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #ebebeb;
+  align-items: flex-start;
+}
+
+.top-paper-row:last-child {
+  border-bottom: none;
+}
+
+.top-paper-rank {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #9ca3af;
+  min-width: 1.8rem;
+  font-family: ui-monospace, 'Courier New', monospace;
+  padding-top: 0.1rem;
+}
+
+.top-paper-body {}
+
+.top-paper-title a {
+  font-size: 0.97rem;
+  font-weight: 600;
+  color: #111;
+  text-decoration: none;
+}
+
+.top-paper-title a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.top-paper-authors {
+  font-size: 0.8rem;
+  color: #777;
+  font-family: ui-monospace, 'Courier New', monospace;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+.digest-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e5e5;
+  font-size: 0.8rem;
+  color: #999;
+  font-family: ui-monospace, 'Courier New', monospace;
+}
+
+/* ── Utility ─────────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+{% block body %}{% endblock %}
+<footer class="digest-footer">
+  Generated at {{ generated_at }} &bull; arxiv-digest
+</footer>
+</body>
+</html>
