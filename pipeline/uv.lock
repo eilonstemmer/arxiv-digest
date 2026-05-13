@@ -61,6 +61,7 @@ dependencies = [
     { name = "jsonschema" },
     { name = "numpy" },
     { name = "pyyaml" },
+    { name = "scikit-learn" },
     { name = "sentence-transformers" },
     { name = "structlog" },
 ]
@@ -80,6 +81,7 @@ requires-dist = [
     { name = "jsonschema", specifier = ">=4.20" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pyyaml", specifier = ">=6.0" },
+    { name = "scikit-learn", specifier = ">=1.3" },
     { name = "sentence-transformers", specifier = ">=2.7" },
     { name = "structlog", specifier = ">=24.0" },
 ]
