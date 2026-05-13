@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arxiv-digest.local/schemas/cluster_label.schema.json",
+  "title": "Cluster label output",
+  "description": "Output of the Sonnet cluster-label prompt — one object per cluster per week.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["label", "description", "subtopics"],
+  "properties": {
+    "label": {
+      "description": "Specific cluster name. 'Mixed Topics' is the only acceptable fallback for heterogeneous clusters.",
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 80
+    },
+    "description": {
+      "description": "One-sentence characterization of what is in this cluster.",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 400
+    },
+    "subtopics": {
+      "description": "0–4 dominant sub-themes. Empty array is fine for tight clusters.",
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 4,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arxiv-digest.local/schemas/triage.schema.json",
+  "title": "Triage output",
+  "description": "Output of the Haiku triage prompt — one object per paper.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "relevance_score",
+    "reason",
+    "matched_interests",
+    "anti_interest_flags"
+  ],
+  "properties": {
+    "relevance_score": {
+      "description": "0.0 (noise) to 10.0 (must-read).",
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 10.0
+    },
+    "reason": {
+      "description": "Paper-specific justification, max 200 chars.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "matched_interests": {
+      "description": "Labels drawn from the operator's profile that this paper matched.",
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
+    },
+    "anti_interest_flags": {
+      "description": "Anti-interests this paper triggered. Caps relevance_score at 4.0 if non-empty.",
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+# config/categories.yaml — arXiv categories to ingest weekly
+#
+# Behavior:
+#   - Commenting out a group stops NEW ingestion for those categories,
+#     but preserves all historical data already in the database.
+#   - Adding a group (uncommenting an existing block or adding a new one)
+#     affects FUTURE runs only — backfill is a separate explicit step
+#     triggered via `python -m src.pipeline backfill`.
+#   - Category codes must match arXiv's official taxonomy:
+#     https://arxiv.org/category_taxonomy
+
+groups:
+  ai_ml:
+    - cs.AI
+    - cs.LG
+    - cs.CL
+    - cs.NE
+    - stat.ML
+
+  robotics_systems:
+    - cs.RO
+    - eess.SY
+    - cs.MA
+
+  # Uncomment any of the following groups to add them to weekly ingestion.
+
+  # finance_quant:
+  #   - q-fin.CP
+  #   - q-fin.PM
+  #   - q-fin.RM
+  #   - q-fin.TR
+  #   - q-fin.ST
+  #   - q-fin.MF
+  #   - cs.CE
+
+  # biology:
+  #   - q-bio.BM
+  #   - q-bio.CB
+  #   - q-bio.GN
+  #   - q-bio.MN
+  #   - q-bio.NC
+  #   - q-bio.PE
+  #   - q-bio.QM
+  #   - q-bio.SC
+  #   - q-bio.TO
+
+  # nano_biophysics:
+  #   - cond-mat.soft
+  #   - cond-mat.mes-hall
+  #   - physics.bio-ph
+  #   - physics.med-ph
+
+  # security:
+  #   - cs.CR

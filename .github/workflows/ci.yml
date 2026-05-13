@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-typecheck-test:
+    name: ${{ matrix.dir }} - ruff + mypy + pytest
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [pipeline, webapp]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if module exists
+        id: check
+        run: |
+          if [ -f "${{ matrix.dir }}/pyproject.toml" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${{ matrix.dir }}/pyproject.toml not present yet; skipping lint/type/test."
+          fi
+
+      - name: Set up Python 3.12
+        if: steps.check.outputs.exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        if: steps.check.outputs.exists == 'true'
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        if: steps.check.outputs.exists == 'true'
+        working-directory: ${{ matrix.dir }}
+        run: uv sync --frozen
+
+      - name: ruff
+        if: steps.check.outputs.exists == 'true'
+        working-directory: ${{ matrix.dir }}
+        run: uv run ruff check .
+
+      - name: mypy --strict
+        if: steps.check.outputs.exists == 'true'
+        working-directory: ${{ matrix.dir }}
+        run: uv run mypy --strict src
+
+      - name: pytest
+        if: steps.check.outputs.exists == 'true'
+        working-directory: ${{ matrix.dir }}
+        env:
+          LLM_MODE: replay
+        run: uv run pytest

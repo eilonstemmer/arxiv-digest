@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arxiv-digest.local/schemas/summarize.schema.json",
+  "title": "Summarize output",
+  "description": "Output of the Sonnet summarize prompt — one object per top-N paper.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "problem",
+    "method",
+    "key_result",
+    "why_it_matters",
+    "novelty_signal",
+    "cross_domain_hooks",
+    "tags"
+  ],
+  "properties": {
+    "problem": {
+      "description": "The specific gap or question the paper addresses.",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 600
+    },
+    "method": {
+      "description": "The core technical approach.",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 600
+    },
+    "key_result": {
+      "description": "The headline finding, with numerical claims when available.",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 600
+    },
+    "why_it_matters": {
+      "description": "Why the operator should (or should not) care, addressed to their interests.",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 1000
+    },
+    "novelty_signal": {
+      "description": "Where this paper sits on the novelty spectrum. The label describes the paper's claim, not the model's endorsement.",
+      "type": "string",
+      "enum": ["incremental", "notable", "breakthrough_claim"]
+    },
+    "cross_domain_hooks": {
+      "description": "Genuine intellectual bridges to candidate papers from other domains. Empty array is correct when none of the candidates form a substantive bridge.",
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["arxiv_id", "connection", "strength"],
+        "properties": {
+          "arxiv_id": {
+            "description": "arXiv ID of the candidate paper this hook references.",
+            "type": "string",
+            "pattern": "^[0-9]{4}\\.[0-9]{4,5}(v[0-9]+)?$"
+          },
+          "connection": {
+            "description": "Specific intellectual bridge — what idea travels and why it matters.",
+            "type": "string",
+            "minLength": 30,
+            "maxLength": 500
+          },
+          "strength": {
+            "description": "Bridge strength. 'weak' = barely worth mentioning. 'strong' = operator should consider reading the candidate.",
+            "type": "string",
+            "enum": ["weak", "moderate", "strong"]
+          }
+        }
+      }
+    },
+    "tags": {
+      "description": "2–5 lowercase-hyphenated topical tags. Avoid jargon stacking.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "minLength": 2,
+        "maxLength": 40
+      }
+    }
+  }
+}

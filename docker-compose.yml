@@ -1,0 +1,82 @@
+# docker-compose.yml — arxiv-digest stack
+#
+# Three services:
+#   webapp     — FastAPI + Jinja2 + HTMX; serves digests at
+#                http://localhost:8080 (bound to 127.0.0.1 only).
+#   pipeline   — batch worker. Gated behind `profiles: ["pipeline"]` so it
+#                does NOT start with `docker compose up`. Trigger it via:
+#                  docker compose run --rm pipeline python -m src.pipeline weekly
+#                or (once the container is running) via:
+#                  docker exec arxiv-digest-pipeline python -m src.pipeline weekly
+#   scheduler  — Alpine + cron. Runs `docker exec` against the pipeline
+#                weekly (Monday 07:00). Requires read+write access to the
+#                Docker socket to execute commands inside the pipeline
+#                container — keep this image minimal and trusted.
+#
+# Volumes (host-side):
+#   ./data     — SQLite DB + rendered HTML. NEVER commit this directory.
+#   ./config   — profile.md + categories.yaml. Mounted read-only.
+#   ./prompts  — Markdown prompts + JSON schemas. Mounted read-only.
+
+services:
+  webapp:
+    build: ./webapp
+    container_name: arxiv-digest-webapp
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./data:/data
+      - ./config:/config:ro
+      - ./prompts:/prompts:ro
+    environment:
+      DB_PATH: /data/digest.db
+      # WEBHOOK_SECRET is the one mandatory env var. The :? syntax fails
+      # the container start with a clear error if it is unset or empty.
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:?WEBHOOK_SECRET is required. Generate with `openssl rand -hex 32` and put it in .env.}
+      # Optional bootstrap fallbacks. DB settings take precedence (see PROJECT_BRIEF.md §4).
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      NOTIFY_EMAIL: ${NOTIFY_EMAIL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      TZ: ${TZ:-UTC}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  pipeline:
+    build: ./pipeline
+    container_name: arxiv-digest-pipeline
+    profiles: ["pipeline"]
+    volumes:
+      - ./data:/data
+      - ./config:/config:ro
+      - ./prompts:/prompts:ro
+    environment:
+      DB_PATH: /data/digest.db
+      WEBAPP_URL: http://webapp:8080
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:?WEBHOOK_SECRET is required.}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TZ: ${TZ:-UTC}
+    depends_on:
+      webapp:
+        condition: service_healthy
+    command: ["python", "-m", "src.pipeline", "health"]
+
+  scheduler:
+    build: ./scheduler
+    container_name: arxiv-digest-scheduler
+    volumes:
+      # Docker socket mounted with write access so the scheduler can run
+      # `docker exec arxiv-digest-pipeline ...` from cron. See README
+      # "Security notes" for the trust trade-off.
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: ${TZ:-UTC}
+    restart: unless-stopped
