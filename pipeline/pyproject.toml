@@ -1,0 +1,51 @@
+[project]
+name = "arxiv-digest-pipeline"
+version = "0.1.0"
+description = "arxiv-digest batch pipeline worker: ingest, embed, prefilter, triage, cluster, summarize, render, notify."
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+dependencies = [
+  "structlog>=24.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+  "mypy>=1.10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  "E", "W", # pycodestyle
+  "F",      # pyflakes
+  "I",      # isort
+  "UP",     # pyupgrade
+  "B",      # bugbear
+  "SIM",    # simplify
+  "TID",    # tidy imports
+  "RUF",    # ruff-specific
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["--strict-markers", "-q"]
