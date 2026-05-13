@@ -114,6 +114,38 @@ def test_load_prompt_real_summarize_user_template_has_candidates_section() -> No
     assert "{{#if NO_CANDIDATES}}" in p.user_template
 
 
+# ---- custom_id encoding (Anthropic Batch API ^[a-zA-Z0-9_-]{1,64}$ rule) ----
+
+
+def test_encode_custom_id_replaces_dots_with_hyphens() -> None:
+    assert llm._encode_custom_id("2401.00001") == "2401-00001"
+    assert llm._encode_custom_id("2401.12345v2") == "2401-12345v2"
+
+
+def test_encode_custom_id_passthrough_for_safe_chars() -> None:
+    assert llm._encode_custom_id("abc_DEF-123") == "abc_DEF-123"
+
+
+def test_encode_custom_id_rejects_invalid_chars() -> None:
+    with pytest.raises(ValueError, match="custom_id must match"):
+        llm._encode_custom_id("has spaces")
+    with pytest.raises(ValueError, match="custom_id must match"):
+        llm._encode_custom_id("has/slash")
+    with pytest.raises(ValueError, match="custom_id must match"):
+        llm._encode_custom_id("")
+
+
+def test_encode_custom_id_rejects_too_long() -> None:
+    too_long = "a" * 65
+    with pytest.raises(ValueError, match="custom_id must match"):
+        llm._encode_custom_id(too_long)
+
+
+def test_decode_custom_id_inverts_encode_for_arxiv_ids() -> None:
+    for arxiv_id in ("2401.00001", "2401.12345v2", "2312.99999v10"):
+        assert llm._decode_custom_id(llm._encode_custom_id(arxiv_id)) == arxiv_id
+
+
 # ---- fill_template ---------------------------------------------------------
 
 

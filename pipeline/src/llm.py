@@ -300,6 +300,26 @@ def _build_system_blocks(system: str, *, cache: bool) -> list[dict[str, Any]]:
     return [block]
 
 
+# Anthropic Batch API requires custom_id to match ^[a-zA-Z0-9_-]{1,64}$, but
+# arxiv_ids contain a literal `.` (e.g. "2401.00001v2"). We encode `.` -> `-`
+# transparently when submitting and decode back when reading results.
+# Modern arxiv_ids never contain `-`, so the round-trip is bijective.
+_CUSTOM_ID_INPUT_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+
+
+def _encode_custom_id(custom_id: str) -> str:
+    if not _CUSTOM_ID_INPUT_RE.match(custom_id):
+        raise ValueError(
+            f"BatchRequest.custom_id must match [A-Za-z0-9._-]{{1,64}}: "
+            f"got {custom_id!r}"
+        )
+    return custom_id.replace(".", "-")
+
+
+def _decode_custom_id(custom_id: str) -> str:
+    return custom_id.replace("-", ".")
+
+
 def _anthropic_messages_create(
     *,
     api_key: str,
@@ -345,7 +365,7 @@ def _anthropic_batches_create(
     client = _get_client(api_key)
     sdk_requests = [
         {
-            "custom_id": r.custom_id,
+            "custom_id": _encode_custom_id(r.custom_id),
             "params": {
                 "model": model,
                 "max_tokens": max_tokens,
@@ -374,7 +394,7 @@ def _anthropic_batches_results(
     client = _get_client(api_key)
     out: list[_RawBatchEntry] = []
     for entry in client.messages.batches.results(batch_id):
-        custom_id = str(entry.custom_id)
+        custom_id = _decode_custom_id(str(entry.custom_id))
         result_type = str(getattr(entry.result, "type", "errored"))
         if result_type == "succeeded":
             msg = entry.result.message  # type: ignore[union-attr]
