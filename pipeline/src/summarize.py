@@ -55,16 +55,6 @@ NO_CANDIDATES_TEXT = (
     "Return `cross_domain_hooks: []`.)"
 )
 
-# Pattern to extract the full content after `## User template` to end of file.
-# llm.load_prompt's _SECTION_RE truncates at any `##` line inside the body;
-# for the summarize prompt that body contains nested `## This paper` and
-# `## Cross-domain candidates` subsections. We read the raw file ourselves.
-_USER_TEMPLATE_RE = re.compile(
-    r"^##\s+User template\s*$\n+(.*)",
-    re.MULTILINE | re.DOTALL,
-)
-
-
 @dataclasses.dataclass(frozen=True)
 class SummarizeResult:
     """Outcome counters for one summarize stage run."""
@@ -257,27 +247,6 @@ def _render_candidates_block(template: str, candidates: list[_Candidate]) -> str
     return out
 
 
-def _load_full_user_template(prompts_dir: Path | str | None) -> str:
-    """Read the full user template from prompts/summarize.md.
-
-    llm.load_prompt's section parser terminates the 'User template' body
-    at the first `^## ` line it finds inside the body (because its lookahead
-    matches any level-2 heading). The summarize user template contains the
-    sub-sections '## This paper' and '## Cross-domain candidates', so the
-    standard parser returns only the text before those sub-headings.
-
-    We extract the full content ourselves by finding the '## User template'
-    header and taking everything that follows it to end-of-file.
-    """
-    base = Path(prompts_dir) if prompts_dir is not None else llm.DEFAULT_PROMPTS_DIR
-    md_path = base / "summarize.md"
-    text = md_path.read_text(encoding="utf-8")
-    match = _USER_TEMPLATE_RE.search(text)
-    if match is None:
-        raise ValueError(f"{md_path}: missing '## User template' section")
-    return match.group(1).strip()
-
-
 def _build_user_message(
     user_template: str,
     row: sqlite3.Row,
@@ -400,10 +369,7 @@ def summarize(
     api_key = settings.anthropic_api_key(conn)
     model = settings.summarize_model(conn)
     prompt = llm.load_prompt("summarize", prompts_dir=prompts_dir)
-    # Load the full user template directly from the raw file; llm.load_prompt's
-    # section parser truncates at the first `##` inside the body, which would
-    # cut off the '## Cross-domain candidates' subsection.
-    user_template = _load_full_user_template(prompts_dir)
+    user_template = prompt.user_template
 
     profile_text = profile_path.read_text(encoding="utf-8")
     system = llm.fill_template(

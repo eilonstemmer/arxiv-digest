@@ -128,9 +128,13 @@ class PromptNotFoundError(FileNotFoundError):
 # Prompt loading + template filling
 # ---------------------------------------------------------------------------
 
+# Only anchor termination on the section markers themselves -- nested `## X`
+# sub-headings inside a section body (e.g. the `## This paper` and
+# `## Cross-domain candidates` sub-headings in prompts/summarize.md's user
+# template) must NOT terminate the section.
 _SECTION_RE = re.compile(
     r"^##\s+(?P<name>System prompt|User template)\s*$\n+"
-    r"(?P<body>.*?)(?=\n^##\s+|\Z)",
+    r"(?P<body>.*?)(?=\n^##\s+(?:System prompt|User template)\s*$|\Z)",
     re.MULTILINE | re.DOTALL,
 )
 

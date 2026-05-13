@@ -80,6 +80,40 @@ def test_load_prompt_strips_trailing_horizontal_rule(tmp_path: Path) -> None:
     assert p.user_template == "User body."
 
 
+def test_load_prompt_preserves_nested_subheadings(tmp_path: Path) -> None:
+    """Regression: section termination must only fire on the two section
+    markers, not on arbitrary `##` lines inside a section body.
+
+    Was: prompts/summarize.md's `## This paper` / `## Cross-domain candidates`
+    sub-headings prematurely truncated the user template body.
+    """
+    (tmp_path / "x.md").write_text(
+        "## System prompt\n\nSystem body.\n\n"
+        "## User template\n\n"
+        "## Inner sub-heading\n"
+        "first chunk\n\n"
+        "## Another sub-heading\n"
+        "second chunk\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "x.schema.json").write_text('{"type": "object"}', encoding="utf-8")
+    p = llm.load_prompt("x", prompts_dir=tmp_path)
+    assert "## Inner sub-heading" in p.user_template
+    assert "first chunk" in p.user_template
+    assert "## Another sub-heading" in p.user_template
+    assert "second chunk" in p.user_template
+
+
+def test_load_prompt_real_summarize_user_template_has_candidates_section() -> None:
+    """The real summarize.md user template has sub-headings; verify they're
+    preserved in the parsed user_template (regression for nested ## bug)."""
+    p = llm.load_prompt("summarize", prompts_dir=PROMPTS_DIR)
+    assert "## This paper" in p.user_template
+    assert "## Cross-domain candidates" in p.user_template
+    assert "{{#each CANDIDATES}}" in p.user_template
+    assert "{{#if NO_CANDIDATES}}" in p.user_template
+
+
 # ---- fill_template ---------------------------------------------------------
 
 
