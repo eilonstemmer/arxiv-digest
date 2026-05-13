@@ -6,6 +6,7 @@ requires-python = ">=3.12,<3.13"
 license = { text = "MIT" }
 dependencies = [
   "structlog>=24.0",
+  "pyyaml>=6.0",
 ]
 
 [dependency-groups]
@@ -13,6 +14,7 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.6",
   "mypy>=1.10",
+  "types-PyYAML>=6.0",
 ]
 
 [build-system]

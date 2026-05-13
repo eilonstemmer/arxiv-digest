@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <title type="html">arXiv synthetic fixture</title>
+  <id>http://arxiv-digest.local/fixtures/synthetic_papers</id>
+  <updated>2026-05-13T10:00:00-04:00</updated>
+  <opensearch:totalResults>3</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <opensearch:itemsPerPage>3</opensearch:itemsPerPage>
+
+  <entry>
+    <id>http://arxiv.org/abs/2401.00001v1</id>
+    <updated>2024-01-02T08:00:00Z</updated>
+    <published>2024-01-01T08:00:00Z</published>
+    <title>Adaptive Tool-Use Memory for
+  Long-Horizon Agents in Cluttered Environments</title>
+    <summary>  We introduce an agent memory system specialized for tool-use over
+  long horizons. Our approach combines retrieval with a structured working
+  buffer.
+</summary>
+    <author>
+      <name>Alice Researcher</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.00001v1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2401.00001v1" rel="related" type="application/pdf"/>
+    <arxiv:primary_category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+
+  <entry>
+    <id>http://arxiv.org/abs/2401.00002v2</id>
+    <updated>2024-02-01T10:00:00Z</updated>
+    <published>2024-01-02T08:00:00Z</published>
+    <title>Diffusion Models for Protein Backbone Design with Sequence Conditioning</title>
+    <summary>We present a diffusion-based generative model for protein backbones that conditions on amino-acid sequences. Accuracy improves by 14.2% on standard benchmarks.</summary>
+    <author>
+      <name>Sébastien Le Berre</name>
+    </author>
+    <author>
+      <name>Carol Engineer</name>
+    </author>
+    <author>
+      <name>Dave Postdoc</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.00002v2" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2401.00002v2" rel="related" type="application/pdf"/>
+    <arxiv:primary_category term="q-bio.BM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="q-bio.BM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+
+  <entry>
+    <id>http://arxiv.org/abs/2401.00003v1</id>
+    <updated>2024-01-03T08:00:00Z</updated>
+    <published>2024-01-03T08:00:00Z</published>
+    <title>Curriculum Learning in Robotic Manipulation</title>
+    <summary>We study curriculum learning strategies for manipulation policies trained from sparse rewards in simulation.</summary>
+    <author>
+      <name>Eve Roboticist</name>
+    </author>
+    <author>
+      <name>Frank Researcher</name>
+    </author>
+    <link href="http://arxiv.org/abs/2401.00003v1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2401.00003v1" rel="related" type="application/pdf"/>
+    <arxiv:primary_category term="cs.RO" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.RO" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>
