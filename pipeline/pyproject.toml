@@ -7,6 +7,8 @@ license = { text = "MIT" }
 dependencies = [
   "structlog>=24.0",
   "pyyaml>=6.0",
+  "numpy>=1.26",
+  "sentence-transformers>=2.7",
 ]
 
 [dependency-groups]
@@ -46,6 +48,10 @@ select = [
 [tool.mypy]
 python_version = "3.12"
 strict = true
+
+[[tool.mypy.overrides]]
+module = ["sentence_transformers.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
