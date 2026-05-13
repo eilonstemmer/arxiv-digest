@@ -1,0 +1,49 @@
+{% extends "_base.html.j2" %}
+{% block title %}Settings — arxiv-digest{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">Settings</h1>
+
+<p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-4 py-2 mb-6">
+  Settings are stored in <code class="text-xs">data/digest.db</code> on this machine.
+  Do not share this file or commit it to version control.
+</p>
+
+<div id="settings-form-container">
+  {% include "partials/settings_form.html.j2" %}
+</div>
+
+<!-- Status section -->
+<section class="mt-8 bg-white border border-gray-200 rounded-lg p-6">
+  <h2 class="text-lg font-semibold mb-4">Status</h2>
+  <dl class="space-y-2 text-sm">
+    <div class="flex gap-2">
+      <dt class="font-medium text-gray-700 w-44 shrink-0">Last successful run:</dt>
+      <dd class="text-gray-800">
+        {% if last_run %}
+          {{ last_run.finished_at[:19].replace("T", " ") }} UTC
+          &mdash; {{ last_run.kind }}
+          {% if last_run.papers_summarized is not none %}
+            ({{ last_run.papers_summarized }} papers summarized)
+          {% endif %}
+        {% else %}
+          <span class="text-gray-400">No successful run yet.</span>
+        {% endif %}
+      </dd>
+    </div>
+    <div class="flex gap-2">
+      <dt class="font-medium text-gray-700 w-44 shrink-0">Cost this week:</dt>
+      <dd class="text-gray-800">${{ "%.4f"|format(cost_this_week) }}</dd>
+    </div>
+    <div class="flex gap-2">
+      <dt class="font-medium text-gray-700 w-44 shrink-0">Database file:</dt>
+      <dd class="text-gray-500 text-xs font-mono">
+        {{ db_path }}
+        {% if db_size_bytes > 0 %}
+          ({{ (db_size_bytes / 1024) | round(1) }} KB)
+        {% endif %}
+      </dd>
+    </div>
+  </dl>
+</section>
+{% endblock %}

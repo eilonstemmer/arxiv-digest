@@ -1,0 +1,31 @@
+{% extends "_base.html.j2" %}
+{% block title %}Digests — arxiv-digest{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">All Digests</h1>
+
+{% if no_digests or not digests %}
+  <div class="bg-yellow-50 border border-yellow-200 rounded p-6 text-center text-yellow-800">
+    <p class="text-lg font-semibold">No digests yet.</p>
+    <p class="mt-2 text-sm">Run the pipeline to generate your first weekly digest:</p>
+    <pre class="mt-2 text-xs bg-yellow-100 rounded px-3 py-2 inline-block">docker compose run --rm pipeline python -m src.pipeline weekly</pre>
+  </div>
+{% else %}
+  <div class="space-y-3">
+    {% for d in digests %}
+    <a href="/digests/{{ d.digest_id }}"
+       class="block bg-white border border-gray-200 rounded-lg px-5 py-4 hover:border-indigo-400 hover:shadow transition">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="font-semibold text-indigo-700">{{ d.digest_id }}</span>
+          <span class="ml-2 text-xs uppercase tracking-wide bg-gray-100 text-gray-600 rounded px-2 py-0.5">{{ d.kind }}</span>
+        </div>
+        <div class="text-sm text-gray-500">
+          {{ d.paper_count }} papers &middot; {{ d.generated_at[:10] }}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "_base.html.j2" %}
+{% block title %}{{ digest.digest_id }} — arxiv-digest{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-3 mb-6">
+  <a href="/digests" class="text-sm text-gray-500 hover:text-indigo-600">&larr; All digests</a>
+  <h1 class="text-2xl font-bold">{{ digest.digest_id }}</h1>
+  <span class="text-xs uppercase tracking-wide bg-gray-100 text-gray-600 rounded px-2 py-0.5">{{ digest.kind }}</span>
+</div>
+
+<div class="text-sm text-gray-500 mb-6">
+  Generated {{ digest.generated_at[:19].replace("T", " ") }} UTC &middot;
+  {{ digest.paper_count }} papers
+  {% if digest.sent_at %}
+    &middot; Emailed {{ digest.sent_at[:10] }}
+  {% endif %}
+</div>
+
+{% if digest_html %}
+  <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div class="prose prose-sm max-w-none p-6">
+      {{ digest_html | safe }}
+    </div>
+  </div>
+{% else %}
+  <div class="bg-yellow-50 border border-yellow-200 rounded p-6 text-yellow-800">
+    <p class="font-semibold">Digest HTML file not found on disk.</p>
+    <p class="mt-1 text-sm">Expected at: <code class="text-xs bg-yellow-100 px-1 rounded">{{ digest.html_path }}</code></p>
+  </div>
+{% endif %}
+{% endblock %}

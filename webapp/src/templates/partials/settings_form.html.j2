@@ -1,0 +1,98 @@
+{% set sections_seen = namespace(value=[]) %}
+
+<form
+  hx-post="/settings"
+  hx-target="#settings-form-container"
+  hx-swap="innerHTML"
+  class="space-y-8"
+>
+  {% if saved %}
+  <div class="bg-green-50 border border-green-300 text-green-800 rounded px-4 py-2 text-sm font-medium">
+    Settings saved.
+  </div>
+  {% endif %}
+
+  {% for meta in settings_list %}
+    {% if meta.section not in sections_seen.value %}
+      {% if not loop.first %}</div>{% endif %}
+      {% set _ = sections_seen.value.append(meta.section) %}
+      <section>
+        <h2 class="text-base font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-4">
+          {{ meta.section }}
+        </h2>
+        <div class="space-y-4">
+    {% endif %}
+
+    <div>
+      <label for="field-{{ meta.key }}" class="block text-sm font-medium text-gray-700 mb-1">
+        {{ meta.label }}
+        {% if meta.default %}
+          <span class="text-xs text-gray-400 font-normal">(default: {{ meta.default }})</span>
+        {% endif %}
+      </label>
+
+      {% set cur = current.get(meta.key) %}
+
+      {% if meta.field_type == "password" %}
+        <input
+          type="password"
+          id="field-{{ meta.key }}"
+          name="{{ meta.key }}"
+          placeholder="{{ '••••••••' if cur else '' }}"
+          autocomplete="new-password"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+        >
+        {% if cur %}
+          <p class="mt-1 text-xs text-gray-400">Leave blank to keep current value.</p>
+        {% endif %}
+
+      {% elif meta.field_type == "bool" %}
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            id="field-{{ meta.key }}"
+            name="{{ meta.key }}"
+            value="true"
+            {% if cur in ("true", "1", "yes", "on") or (cur is none and meta.default in ("true", "1")) %}
+              checked
+            {% endif %}
+            class="rounded border-gray-300 text-indigo-600"
+          >
+          <span class="text-sm text-gray-700">Enabled</span>
+        </label>
+
+      {% elif meta.field_type in ("number", "float") %}
+        <input
+          type="number"
+          id="field-{{ meta.key }}"
+          name="{{ meta.key }}"
+          value="{{ cur if cur is not none else meta.default }}"
+          step="{{ '0.01' if meta.field_type == 'float' else '1' }}"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+        >
+
+      {% else %}
+        <input
+          type="text"
+          id="field-{{ meta.key }}"
+          name="{{ meta.key }}"
+          value="{{ cur if cur is not none else (meta.default or '') }}"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+        >
+      {% endif %}
+
+      {% if meta.help_text %}
+        <p class="mt-1 text-xs text-gray-500">{{ meta.help_text }}</p>
+      {% endif %}
+    </div>
+
+    {% if loop.last %}</div></section>{% endif %}
+  {% endfor %}
+
+  <div class="pt-2">
+    <button type="submit"
+            class="bg-indigo-600 text-white rounded px-5 py-2 text-sm font-medium hover:bg-indigo-700">
+      Save Settings
+    </button>
+  </div>
+</form>
